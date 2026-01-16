@@ -30,7 +30,7 @@ And below it, they say "While it might seem like a simple screenshot, building a
 
 And if you try to compile it yourself, you'll see that it's very far away from being a functional browser at all, and seemingly, it never actually was able to build.
 
-Multiple recent GitHub Actions runs on `main` show failures (including workflow-file errors), and independent build attempts report dozens of compiler errors, recent PRs were all merged with failing CI, and going back in the Git history from most recent commit back about 100 commits, I couldn't find a single commit that compiled cleanly.
+Multiple recent GitHub Actions runs on `main` show failures (including workflow-file errors), and independent build attempts report dozens of compiler errors, recent PRs were all merged with failing CI, and going back in the Git history from most recent commit back 100 commits,<br/>[I couldn't find a single commit that compiled cleanly](https://gist.github.com/embedding-shapes/f5d096dd10be44ff82b6e5ccdaf00b29).
 
 I'm not sure what the "agents" they unleashed on this codebase actually did, but they seemingly never ran "cargo build" or even less "cargo check", because both of those commands surface 10s of errors (which surely would balloon should we solve them) and about 100 warnings. There is an open GitHub issue in their repository about this right now: https://github.com/wilsonzlin/fastrender/issues/98
 
