@@ -6,9 +6,7 @@ date: 2026-01-16
 
 On January 14th 2026, Cursor published a blog post titled "Scaling long-running autonomous coding" (https://cursor.com/blog/scaling-agents)
 
-In the blog post, they talk about their experiments with running "coding agents autonomously for weeks"
-
-with the explicit goal of
+In the blog post, they talk about their experiments with running "coding agents autonomously for weeks" with the explicit goal of
 
 > understand[ing] how far we can push the frontier of agentic coding for projects that typically take human teams months to complete
 
