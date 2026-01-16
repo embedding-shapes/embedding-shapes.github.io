@@ -213,3 +213,12 @@ footer {
   border-radius: 3px;
   color: #d4d4d4;
 }
+
+.versions pre {
+  white-space: pre-wrap;
+}
+
+.versions pre code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

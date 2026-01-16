@@ -18,7 +18,12 @@
           h = niccup.lib;
 
           postsDir = ./posts;
-          gitDir = if builtins.pathExists ./.git then ./.git else null;
+          repoRoot = builtins.getEnv "BLOG_REPO_ROOT";
+          gitDir =
+            if builtins.pathExists ./.git then ./.git
+            else if repoRoot != "" && builtins.pathExists (repoRoot + "/.git")
+              then builtins.path { path = repoRoot + "/.git"; name = "blog-git-dir"; }
+              else null;
 
           # Convert markdown to HTML using pandoc (supports GFM tables + syntax highlighting)
           # Pandoc automatically skips YAML frontmatter
@@ -27,7 +32,7 @@
           '');
 
           postVersionsMd = filename: pkgs.runCommandLocal "post-versions-${lib.removeSuffix ".md" filename}.md" {
-            nativeBuildInputs = [ pkgs.git pkgs.gnused ];
+            nativeBuildInputs = [ pkgs.git pkgs.gnused pkgs.gnugrep ];
           } ''
             set -euo pipefail
             export GIT_DIR=${gitDir}
@@ -57,7 +62,34 @@
                 echo
 
                 echo '````````diff'
-                ${pkgs.git}/bin/git show --no-color --format= --unified=3 "$hash" -- "$file" 2>/dev/null || true
+                diff_full="$TMPDIR/diff.full"
+                diff_body="$TMPDIR/diff.body"
+                diff_word="$TMPDIR/diff.word"
+
+                status="$(${pkgs.git}/bin/git show --no-color --format= --name-status -1 "$hash" -- "$file" 2>/dev/null | ${pkgs.gnused}/bin/sed -n '1s/\t.*$//p')"
+
+                case "$status" in
+                  A*|D*)
+                    ${pkgs.git}/bin/git show --no-color --format= --unified=0 "$hash" -- "$file" 2>/dev/null > "$diff_full" || true
+                    ;;
+                  *)
+                    ${pkgs.git}/bin/git show --no-color --format= --unified=0 --word-diff=porcelain "$hash" -- "$file" 2>/dev/null > "$diff_full" || true
+                    ;;
+                esac
+
+                ${pkgs.gnused}/bin/sed -n '/^@@ /,$p' "$diff_full" > "$diff_body"
+
+                if ! printf '%s' "$status" | ${pkgs.gnugrep}/bin/grep -qE '^(A|D)'; then
+                  ${pkgs.gnused}/bin/sed '/^~$/d' "$diff_body" > "$diff_word"
+                  if ${pkgs.gnugrep}/bin/grep -qE '^[+-]' "$diff_word"; then
+                    cat "$diff_word" > "$diff_body"
+                  else
+                    ${pkgs.git}/bin/git show --no-color --format= --unified=0 "$hash" -- "$file" 2>/dev/null > "$diff_full" || true
+                    ${pkgs.gnused}/bin/sed -n '/^@@ /,$p' "$diff_full" > "$diff_body"
+                  fi
+                fi
+
+                cat "$diff_body"
                 echo '````````'
                 echo
                 echo '</details>'

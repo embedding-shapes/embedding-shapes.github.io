@@ -4,4 +4,4 @@ serve:
   nix run .#serve
 
 build:
-  nix build
+  BLOG_REPO_ROOT=$(pwd) nix build --impure

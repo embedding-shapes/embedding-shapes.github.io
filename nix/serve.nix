@@ -5,9 +5,11 @@ let
     name = "serve";
     runtimeInputs = [ pkgs.python3 pkgs.watchexec ];
     text = ''
+      REPO_ROOT="$(pwd)"
+
       # Initial build
       echo "Building..."
-      nix build
+      env BLOG_REPO_ROOT="$REPO_ROOT" nix build --impure
 
       echo "Serving at http://localhost:8000"
       echo "Watching: posts/, style.css, flake.nix"
@@ -19,7 +21,7 @@ let
       trap 'kill $server_pid 2>/dev/null' EXIT
 
       # Watch and rebuild on changes
-      watchexec --watch posts --watch style.css --watch flake.nix -- nix build
+      watchexec --watch posts --watch style.css --watch flake.nix -- env BLOG_REPO_ROOT="$REPO_ROOT" nix build --impure
     '';
   };
 in
