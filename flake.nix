@@ -105,6 +105,7 @@
               [ "title" title ]
               [ "link" { rel = "stylesheet"; href = "/style.css"; } ]
               [ "link" { rel = "stylesheet"; href = "/highlight.css"; } ]
+              [ "link" { rel = "icon"; href = "/favicon.svg"; } ]
             ]
             [ "body"
               header
@@ -135,6 +136,8 @@
             mkdir -p $out
             cp ${./style.css} $out/style.css
             cp ${highlightCss} $out/highlight.css
+            cp ${./favicon.svg} $out/favicon.svg
+            cp -r ${./content} $out/content
             cp ${indexHtml} $out/index.html
             mkdir -p $out/posts
             cp ${postsHtml} $out/posts/index.html

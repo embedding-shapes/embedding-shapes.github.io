@@ -30,11 +30,13 @@ And below it, they say "While it might seem like a simple screenshot, building a
 
 > error: could not compile 'fastrender' (lib) due to 34 previous errors; 94 warnings emitted
 
-And if you try to compile it yourself, you'll see that it's very far away from being a functional browser at all, and seemingly, it never actually was able to build. Multiple recent GitHub Actions runs on `main` show failures (including workflow-file errors), and independent build attempts report dozens of compiler errors, recent PRs were all merged with failing CI, and going back in the Git history from most recent commit, I couldn't find a single commit that compiled cleanly.
+And if you try to compile it yourself, you'll see that it's very far away from being a functional browser at all, and seemingly, it never actually was able to build.
+
+Multiple recent GitHub Actions runs on `main` show failures (including workflow-file errors), and independent build attempts report dozens of compiler errors, recent PRs were all merged with failing CI, and going back in the Git history from most recent commit back about 100 commits, I couldn't find a single commit that compiled cleanly.
 
 I'm not sure what the "agents" they unleashed on this codebase actually did, but they seemingly never ran "cargo build" or even less "cargo check", because both of those commands surface 10s of errors (which surely would balloon should we solve them) and about 100 warnings. There is an open GitHub issue in their repository about this right now: https://github.com/wilsonzlin/fastrender/issues/98
 
-And diving into the codebase, if the compilation errors didn't make that sure, makes it very clear to any software developer that none of this is actually engineered code. It is what is typically known as "AI slop", low quality *something* that surely represents *something*, but it doesn't have intention behind it, and it doesn't even compile at this point.
+And diving into the codebase, if the compilation errors didn't make that clear already, makes it very clear to any software developer that none of this is actually engineered code. It is what is typically known as "AI slop", low quality *something* that surely represents *something*, but it doesn't have intention behind it, and it doesn't even compile at this point.
 
 They later start to talk about what's next, but not a single word about how to run it, what to expect, how it's working or anything else. Cursor's blog post provides no reproducible demo and no known-good revision (tag/release/commit) to verify the screenshots, beyond linking the repo.
 
@@ -56,6 +58,6 @@ The closest they get to implying that this was a success, is this part:
 
 > Hundreds of agents can work together on a single codebase for weeks, making real progress on ambitious projects.
 
-But this extraordinary claim isn't backed up by any evidence. In the blog post they never provide a working commit, build instructions or even a demo that can reproduced.
+But this extraordinary claim isn't backed up by any evidence. In the blog post they never provide a working commit, build instructions or even a demo that can be reproduced.
 
 I don't think anyone expects this browser to be the next Chrome, but I do think that if you claim you've built a browser, it should at least be able to demonstrate being able to be compiled + loading a basic HTML file at the very least.

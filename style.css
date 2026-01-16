@@ -71,6 +71,12 @@ main p {
   margin-bottom: 1.25rem;
 }
 
+main img,
+main video {
+  max-width: 100%;
+  height: auto;
+}
+
 main ul, main ol {
   margin: 1.25rem 0 1.25rem 1.25rem;
 }
