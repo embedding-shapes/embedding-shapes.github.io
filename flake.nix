@@ -18,12 +18,59 @@
           h = niccup.lib;
 
           postsDir = ./posts;
+          gitDir = if builtins.pathExists ./.git then ./.git else null;
 
           # Convert markdown to HTML using pandoc (supports GFM tables + syntax highlighting)
           # Pandoc automatically skips YAML frontmatter
           mdToHtml = mdPath: builtins.readFile (pkgs.runCommandLocal "md-to-html" {} ''
             ${pkgs.pandoc}/bin/pandoc -f gfm -t html --highlight-style=breezedark ${mdPath} -o $out
           '');
+
+          postVersionsMd = filename: pkgs.runCommandLocal "post-versions-${lib.removeSuffix ".md" filename}.md" {
+            nativeBuildInputs = [ pkgs.git pkgs.gnused ];
+          } ''
+            set -euo pipefail
+            export GIT_DIR=${gitDir}
+            export GIT_OPTIONAL_LOCKS=0
+
+            file="posts/${filename}"
+            log="$TMPDIR/log.tsv"
+
+            ${pkgs.git}/bin/git log --follow --date=short --format='%H%x09%ad%x09%s' -- "$file" > "$log" 2>/dev/null || true
+
+            if [ ! -s "$log" ]; then
+              : > "$out"
+              exit 0
+            fi
+
+            {
+              echo '<details class="versions">'
+              echo '<summary>Versions</summary>'
+              echo
+
+              while IFS="$(printf '\t')" read -r hash date subject; do
+                short="$(printf '%.7s' "$hash")"
+                esc_subject="$(printf '%s' "$subject" | ${pkgs.gnused}/bin/sed -e 's/&/&amp;/g' -e 's/</&lt;/g' -e 's/>/&gt;/g')"
+
+                echo '<details class="version">'
+                echo "<summary>$date <code>$short</code> $esc_subject</summary>"
+                echo
+
+                echo '````````diff'
+                ${pkgs.git}/bin/git show --no-color --format= --unified=3 "$hash" -- "$file" 2>/dev/null || true
+                echo '````````'
+                echo
+                echo '</details>'
+                echo
+              done < "$log"
+
+              echo '</details>'
+            } > "$out"
+          '';
+
+          postVersionsHtml = filename:
+            if gitDir == null then ""
+            else mdToHtml (postVersionsMd filename);
 
           # Parse YAML frontmatter to extract date
           # Expects format: ---\ndate: YYYY-MM-DD\n---
@@ -78,6 +125,7 @@
               title = filenameToTitle filename;
               date = frontmatter.date;
               body = mdToHtml (postsDir + "/${filename}");
+              versions = postVersionsHtml filename;
             }) postFiles;
 
           # Sort posts by date, newest first
@@ -147,6 +195,7 @@
                 content = [
                   (lib.optional (post.date != null) [ "p" { class = "post-date"; } post.date ])
                   (h.raw post.body)
+                  (lib.optional (post.versions != "") (h.raw post.versions))
                 ];
               })} $out/${post.slug}/index.html"
             ) sortedPosts)}

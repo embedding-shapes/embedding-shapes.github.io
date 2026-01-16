@@ -179,3 +179,37 @@ footer {
   color: #555;
   font-size: 0.8125rem;
 }
+
+.versions {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #2a2a2a;
+}
+
+.versions > summary {
+  cursor: pointer;
+  color: #b8b8b8;
+  font-weight: 600;
+}
+
+.versions > summary:hover {
+  color: #e0e0e0;
+}
+
+.versions details.version {
+  margin-top: 1rem;
+}
+
+.versions details.version > summary {
+  cursor: pointer;
+  color: #999;
+  font-size: 0.9375rem;
+}
+
+.versions details.version > summary code {
+  background: #252525;
+  padding: 0.125em 0.375em;
+  font-size: 0.875em;
+  border-radius: 3px;
+  color: #d4d4d4;
+}
