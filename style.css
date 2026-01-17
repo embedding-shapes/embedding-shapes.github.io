@@ -183,7 +183,12 @@ main tbody tr:hover {
 
 .post-list a:hover {
   color: #e0e0e0;
+  text-decoration: none;
+}
+
+.post-list a:hover .post-title {
   text-decoration: underline;
+  text-decoration-thickness: 2px;
   text-underline-offset: 2px;
 }
 
