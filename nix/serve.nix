@@ -12,7 +12,7 @@ let
       env BLOG_REPO_ROOT="$REPO_ROOT" nix build --impure
 
       echo "Serving at http://localhost:8000"
-      echo "Watching: posts/, style.css, flake.nix"
+      echo "Watching: posts/, style.css, flake.nix, nix/"
       echo "Press Ctrl+C to stop"
 
       # Start HTTP server in background
@@ -21,7 +21,7 @@ let
       trap 'kill $server_pid 2>/dev/null' EXIT
 
       # Watch and rebuild on changes
-      watchexec --watch posts --watch style.css --watch flake.nix -- env BLOG_REPO_ROOT="$REPO_ROOT" nix build --impure
+      watchexec --watch posts --watch style.css --watch flake.nix --watch nix -- env BLOG_REPO_ROOT="$REPO_ROOT" nix build --impure
     '';
   };
 in
