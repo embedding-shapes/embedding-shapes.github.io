@@ -184,7 +184,14 @@
             (map (p: [ "li" [ "a" { href = "/${p.slug}/"; } p.title ] ]) sortedPosts)
           ];
 
-          renderPage = { title, content, navActive ? null }: h.renderPretty [
+          renderPage = { title, content, path ? null }:
+            let
+              navActive =
+                if path == "/" then "home"
+                else if path == "/posts/" then "posts"
+                else if path == "/about/" then "about"
+                else null;
+            in h.renderPretty [
             "html" { lang = "en"; }
             [ "head"
               [ "meta" { charset = "utf-8"; } ]
@@ -203,7 +210,7 @@
 
           indexHtml = pkgs.writeText "index.html" (renderPage {
             title = "embedding-shapes";
-            navActive = "home";
+            path = "/";
             content = [
               [ "p" { class = "intro"; } "Welcome to my blog. I write about technology, Nix, and other topics." ]
               [ "h2" "Recent Posts" ]
@@ -213,7 +220,7 @@
 
           postsHtml = pkgs.writeText "posts.html" (renderPage {
             title = "Posts";
-            navActive = "posts";
+            path = "/posts/";
             content = [
               [ "h1" "Posts" ]
               postList
@@ -222,7 +229,7 @@
 
           aboutHtml = pkgs.writeText "about.html" (renderPage {
             title = "About";
-            navActive = "about";
+            path = "/about/";
             content = [
               [ "h1" "About" ]
               [ "ul"
