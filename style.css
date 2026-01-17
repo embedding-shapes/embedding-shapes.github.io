@@ -1,3 +1,7 @@
+html {
+  overflow-y: scroll;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -42,6 +46,11 @@ header nav a {
 
 header nav a:hover {
   color: #b8b8b8;
+}
+
+header nav a[aria-current="page"] {
+  color: #e8e8e8;
+  text-shadow: 0.02em 0 0 currentColor, -0.02em 0 0 currentColor;
 }
 
 main h1 {

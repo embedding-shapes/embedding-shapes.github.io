@@ -163,12 +163,18 @@
           # Sort posts by date, newest first
           sortedPosts = lib.sort (a: b: a.date > b.date) posts;
 
-          header = [ "header"
+          navLink = { href, label, key, active }: [
+            "a"
+            (if key == active then { inherit href; "aria-current" = "page"; } else { inherit href; })
+            label
+          ];
+
+          header = navActive: [ "header"
             [ "a" { href = "/"; } "embedding-shapes" ]
             [ "nav"
-              [ "a" { href = "/"; } "Home" ]
-              [ "a" { href = "/posts/"; } "Posts" ]
-              [ "a" { href = "/about/"; } "About" ]
+              (navLink { href = "/"; label = "Home"; key = "home"; active = navActive; })
+              (navLink { href = "/posts/"; label = "Posts"; key = "posts"; active = navActive; })
+              (navLink { href = "/about/"; label = "About"; key = "about"; active = navActive; })
             ]
           ];
 
@@ -178,7 +184,7 @@
             (map (p: [ "li" [ "a" { href = "/${p.slug}/"; } p.title ] ]) sortedPosts)
           ];
 
-          renderPage = { title, content }: h.renderPretty [
+          renderPage = { title, content, navActive ? null }: h.renderPretty [
             "html" { lang = "en"; }
             [ "head"
               [ "meta" { charset = "utf-8"; } ]
@@ -189,7 +195,7 @@
               [ "link" { rel = "icon"; href = "/favicon.svg"; } ]
             ]
             [ "body"
-              header
+              (header navActive)
               [ "main" content ]
               footer
             ]
@@ -197,6 +203,7 @@
 
           indexHtml = pkgs.writeText "index.html" (renderPage {
             title = "embedding-shapes";
+            navActive = "home";
             content = [
               [ "p" { class = "intro"; } "Welcome to my blog. I write about technology, Nix, and other topics." ]
               [ "h2" "Recent Posts" ]
@@ -206,6 +213,7 @@
 
           postsHtml = pkgs.writeText "posts.html" (renderPage {
             title = "Posts";
+            navActive = "posts";
             content = [
               [ "h1" "Posts" ]
               postList
@@ -214,6 +222,7 @@
 
           aboutHtml = pkgs.writeText "about.html" (renderPage {
             title = "About";
+            navActive = "about";
             content = [
               [ "h1" "About" ]
               [ "ul"
