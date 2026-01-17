@@ -21,23 +21,61 @@ let
 
   versions = import ../versions.nix { inherit pkgs lib gitDir mdToHtml; };
 
-  # Parse YAML frontmatter to extract date
-  # Expects format: ---\ndate: YYYY-MM-DD\n---
-  parseFrontmatter = content:
+  dropWhile = pred: list:
+    if list == [] then []
+    else if pred (builtins.head list) then dropWhile pred (builtins.tail list)
+    else list;
+
+  # Parse YAML frontmatter (title/date) and derive a markdown body
+  # - If frontmatter is present, it's stripped from the body.
+  # - If the first non-empty body line is a Markdown H1, it's treated as the title
+  #   (only when no frontmatter title is present) and stripped from the body.
+  parsePost = content:
     let
       lines = lib.splitString "\n" content;
-      hasFrontmatter = (builtins.head lines) == "---";
+      hasFrontmatter = lines != [] && (builtins.head lines) == "---";
+      tailLines = if lines != [] then builtins.tail lines else [];
       frontmatterEndIdx = if hasFrontmatter
-        then lib.lists.findFirstIndex (l: l == "---") null (builtins.tail lines)
+        then lib.lists.findFirstIndex (l: l == "---") null tailLines
         else null;
       frontmatterLines = if frontmatterEndIdx != null
-        then lib.take frontmatterEndIdx (builtins.tail lines)
+        then lib.take frontmatterEndIdx tailLines
         else [];
-      dateLine = lib.findFirst (l: lib.hasPrefix "date:" l) null frontmatterLines;
-      date = if dateLine != null
-        then lib.trim (lib.removePrefix "date:" dateLine)
+      bodyLines0 = if hasFrontmatter && frontmatterEndIdx != null
+        then lib.drop (frontmatterEndIdx + 1) tailLines
+        else lines;
+
+      trimLine = l: lib.trim l;
+      stripOuterQuotes = s:
+        let
+          len = builtins.stringLength s;
+          first = if len > 0 then builtins.substring 0 1 s else "";
+          last = if len > 0 then builtins.substring (len - 1) 1 s else "";
+        in if len >= 2 && ((first == "\"" && last == "\"") || (first == "'" && last == "'"))
+          then builtins.substring 1 (len - 2) s
+          else s;
+      isBlank = l: (trimLine l) == "";
+      bodyLines1 = dropWhile isBlank bodyLines0;
+
+      titleLine = lib.findFirst (l: lib.hasPrefix "title:" l) null frontmatterLines;
+      frontmatterTitle = if titleLine != null
+        then stripOuterQuotes (trimLine (lib.removePrefix "title:" titleLine))
         else null;
-    in { inherit date; };
+
+      dateLine = lib.findFirst (l: lib.hasPrefix "date:" l) null frontmatterLines;
+      date = if dateLine != null then trimLine (lib.removePrefix "date:" dateLine) else null;
+
+      hasTopLevelH1 = bodyLines1 != [] && lib.hasPrefix "# " (builtins.head bodyLines1);
+      h1Title = if hasTopLevelH1 then trimLine (lib.removePrefix "# " (builtins.head bodyLines1)) else null;
+
+      title = if frontmatterTitle != null then frontmatterTitle else h1Title;
+
+      bodyLines2 =
+        if hasTopLevelH1
+        then dropWhile isBlank (builtins.tail bodyLines1)
+        else bodyLines1;
+      bodyMarkdown = lib.concatStringsSep "\n" bodyLines2;
+    in { inherit title date bodyMarkdown; };
 
   # Generate syntax highlighting CSS from pandoc
   highlightCss = pkgs.runCommandLocal "highlight.css" {} ''
@@ -68,21 +106,25 @@ let
   posts = lib.mapAttrsToList (filename: _:
     let
       content = builtins.readFile (postsDir + "/${filename}");
-      frontmatter = parseFrontmatter content;
-    in {
+      parsed = parsePost content;
       slug = lib.removeSuffix ".md" filename;
-      title = filenameToTitle filename;
-      date = frontmatter.date;
-      body = mdToHtml (postsDir + "/${filename}");
+      mdBodyPath = pkgs.writeText "post-${slug}.md" parsed.bodyMarkdown;
+    in {
+      inherit slug;
+      title = if parsed.title != null then parsed.title else filenameToTitle filename;
+      date = parsed.date;
+      body = mdToHtml mdBodyPath;
       versions = versions.postVersionsHtml filename;
     }) postFiles;
 
   # Sort posts by date, newest first
-  sortedPosts = lib.sort (a: b: a.date > b.date) posts;
+  sortedPosts =
+    let
+      dateKey = p: if p.date == null then "0000-00-00" else p.date;
+    in lib.sort (a: b: dateKey a > dateKey b) posts;
 
 in {
   posts = sortedPosts;
   inherit highlightCss;
   inherit (versions) repoVersions;
 }
-

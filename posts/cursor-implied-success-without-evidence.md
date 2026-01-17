@@ -1,8 +1,7 @@
 ---
+title: Cursor's latest "browser experiment" implied success without evidence
 date: 2026-01-16
 ---
-
-# Cursor's latest "browser experiment" implied success without evidence
 
 On January 14th 2026, Cursor published a blog post titled "Scaling long-running autonomous coding" (https://cursor.com/blog/scaling-agents)
 

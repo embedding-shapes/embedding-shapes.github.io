@@ -19,7 +19,15 @@ let
   footer = [ "footer" [ "p" "Built with "  [ "a" { href = "https://embedding-shapes.github.io/niccup/"; } "niccup" ]] ];
 
   postList = posts: [ "ul" { class = "post-list"; }
-    (map (p: [ "li" [ "a" { href = "/${p.slug}/"; } p.title ] ]) posts)
+    (map (p: [ "li"
+      [ "a" { href = "/${p.slug}/"; }
+        (lib.optionals (p.date != null) [
+          [ "span" { class = "post-date"; } p.date ]
+          [ "br" ]
+        ])
+        [ "span" { class = "post-title"; } p.title ]
+      ]
+    ]) posts)
   ];
 
   renderPage = { title, content, path ? null }:
@@ -84,10 +92,10 @@ in {
   renderPostPage = { post }: renderPage {
     title = post.title;
     content = [
+      [ "h1" post.title ]
       (lib.optional (post.date != null) [ "p" { class = "post-date"; } post.date ])
       (h.raw post.body)
       (lib.optional (post.versions != "") (h.raw post.versions))
     ];
   };
 }
-

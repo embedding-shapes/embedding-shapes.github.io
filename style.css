@@ -165,6 +165,10 @@ main tbody tr:hover {
 
 .post-list {
   list-style: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .post-list li {
@@ -181,6 +185,11 @@ main tbody tr:hover {
   color: #e0e0e0;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.post-date {
+  color: #777;
+  font-size: 0.9375rem;
 }
 
 footer {
