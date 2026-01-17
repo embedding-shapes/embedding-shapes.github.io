@@ -168,6 +168,7 @@
             [ "nav"
               [ "a" { href = "/"; } "Home" ]
               [ "a" { href = "/posts/"; } "Posts" ]
+              [ "a" { href = "/about/"; } "About" ]
             ]
           ];
 
@@ -211,6 +212,18 @@
             ];
           });
 
+          aboutHtml = pkgs.writeText "about.html" (renderPage {
+            title = "About";
+            content = [
+              [ "h1" "About" ]
+              [ "ul"
+                [ "li" "GitHub: " [ "a" { href = "https://github.com/embedding-shapes/"; } "embedding-shapes" ] ]
+                [ "li" "Bluesky: " [ "a" { href = "https://bsky.app/profile/embedding-shapes.bsky.social"; } "embedding-shapes.bsky.social" ] ]
+                [ "li" "Email: " [ "a" { href = "mailto:embedding-shapes@proton.me"; } "embedding-shapes@proton.me" ] ]
+              ]
+            ];
+          });
+
         in {
           default = pkgs.runCommand "blog" {} ''
             mkdir -p $out
@@ -221,6 +234,8 @@
             cp ${indexHtml} $out/index.html
             mkdir -p $out/posts
             cp ${postsHtml} $out/posts/index.html
+            mkdir -p $out/about
+            cp ${aboutHtml} $out/about/index.html
             ${builtins.concatStringsSep "\n" (map (post:
               "mkdir -p $out/${post.slug} && cp ${pkgs.writeText "index.html" (renderPage {
                 inherit (post) title;
