@@ -7,6 +7,14 @@ let
     label
   ];
 
+  plausibleAnalytics = [
+    [ "script" { async = true; src = "https://plausible.io/js/pa-FG5K-GlhTzYQkb3KeYVzG.js"; } ]
+    [ "script" (h.raw ''
+      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+      plausible.init()
+    '') ]
+  ];
+
   header = navActive: [ "header"
     [ "a" { href = "/"; } "embedding-shapes" ]
     [ "nav"
@@ -46,6 +54,7 @@ let
       [ "link" { rel = "stylesheet"; href = "/style.css"; } ]
       [ "link" { rel = "stylesheet"; href = "/highlight.css"; } ]
       [ "link" { rel = "icon"; href = "/favicon.svg"; } ]
+      plausibleAnalytics
     ]
     [ "body"
       (header navActive)
