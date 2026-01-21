@@ -1,6 +1,55 @@
 { lib, h }:
 
 let
+  siteTitle = "embedding-shapes";
+  siteUrl = "https://embedding-shapes.github.io";
+  siteDescription = "Welcome to my blog. I write about technology, Nix, and other topics.";
+
+  homeUrl = "${siteUrl}/";
+  postUrl = slug: "${siteUrl}/${slug}/";
+
+  xmlHeader = encoding: ''<?xml version="1.0" encoding="${encoding}"?>'';
+
+  isoDateToRfc3339 = date: "${date}T00:00:00Z";
+  isoDateToRfc822 = date:
+    let
+      year = builtins.substring 0 4 date;
+      monthNum = builtins.substring 5 2 date;
+      day = builtins.substring 8 2 date;
+      monthMap = {
+        "01" = "Jan"; "02" = "Feb"; "03" = "Mar"; "04" = "Apr";
+        "05" = "May"; "06" = "Jun"; "07" = "Jul"; "08" = "Aug";
+        "09" = "Sep"; "10" = "Oct"; "11" = "Nov"; "12" = "Dec";
+      };
+      month = monthMap.${monthNum} or monthNum;
+    in "${day} ${month} ${year} 00:00:00 +0000";
+
+  feedMaxItems = 20;
+
+  mkFeedModel = posts:
+    let
+      feedPosts = lib.take feedMaxItems posts;
+      entries = map (post: {
+        inherit (post) title date body;
+        url = postUrl post.slug;
+      }) feedPosts;
+      latestEntry = lib.findFirst (e: e.date != null) null entries;
+      latestDate = if latestEntry != null then latestEntry.date else null;
+    in { inherit entries latestDate; };
+
+  xmlEscape = s: builtins.replaceStrings
+    [ "&" "<" ">" "\"" "'" ]
+    [ "&amp;" "&lt;" "&gt;" "&quot;" "&apos;" ]
+    (builtins.toString s);
+
+  xmlAttrs = attrs: builtins.concatStringsSep "" (lib.mapAttrsToList (k: v: " ${k}=\"${xmlEscape v}\"") attrs);
+
+  xmlLink = { attrs ? {}, content ? null }:
+    let renderedAttrs = xmlAttrs attrs;
+    in if content == null
+      then h.raw "<link${renderedAttrs} />\n"
+      else h.raw "<link${renderedAttrs}>${xmlEscape content}</link>\n";
+
   navLink = { href, label, key, active }: [
     "a"
     (if key == active then { inherit href; "aria-current" = "page"; } else { inherit href; })
@@ -16,7 +65,7 @@ let
   ];
 
   header = navActive: [ "header"
-    [ "a" { href = "/"; } "embedding-shapes" ]
+    [ "a" { href = "/"; } siteTitle ]
     [ "nav"
       (navLink { href = "/"; label = "Home"; key = "home"; active = navActive; })
       (navLink { href = "/posts/"; label = "Posts"; key = "posts"; active = navActive; })
@@ -54,6 +103,8 @@ let
       [ "link" { rel = "stylesheet"; href = "/style.css"; } ]
       [ "link" { rel = "stylesheet"; href = "/highlight.css"; } ]
       [ "link" { rel = "icon"; href = "/favicon.svg"; } ]
+      [ "link" { rel = "alternate"; type = "application/rss+xml"; title = "${siteTitle} RSS"; href = "/rss.xml"; } ]
+      [ "link" { rel = "alternate"; type = "application/atom+xml"; title = "${siteTitle} Atom"; href = "/atom.xml"; } ]
       plausibleAnalytics
     ]
     [ "body"
@@ -65,10 +116,10 @@ let
 
 in {
   renderIndexPage = { posts }: renderPage {
-    title = "embedding-shapes";
+    title = siteTitle;
     path = "/";
     content = [
-      [ "p" { class = "intro"; } "Welcome to my blog. I write about technology, Nix, and other topics." ]
+      [ "p" { class = "intro"; } siteDescription ]
       [ "h2" "Recent Posts" ]
       (postList posts)
     ];
@@ -107,4 +158,50 @@ in {
       (lib.optional (post.versions != "") (h.raw post.versions))
     ];
   };
+
+  renderRssFeed = { posts }:
+    let
+      m = mkFeedModel posts;
+      lastBuildDate = if m.latestDate != null then isoDateToRfc822 m.latestDate else null;
+    in (xmlHeader "UTF-8") + "\n" + (h.render [
+      "rss" { version = "2.0"; }
+      [ "channel"
+        [ "title" siteTitle ]
+        (xmlLink { content = homeUrl; })
+        [ "description" siteDescription ]
+        [ "language" "en" ]
+        (lib.optional (lastBuildDate != null) [ "lastBuildDate" lastBuildDate ])
+        (map (e: [ "item"
+          [ "title" e.title ]
+          (xmlLink { content = e.url; })
+          [ "guid" { isPermaLink = "true"; } e.url ]
+          (lib.optional (e.date != null) [ "pubDate" (isoDateToRfc822 e.date) ])
+          [ "description" e.body ]
+        ]) m.entries)
+      ]
+    ]);
+
+  renderAtomFeed = { posts }:
+    let
+      m = mkFeedModel posts;
+      feedUpdated = if m.latestDate != null then isoDateToRfc3339 m.latestDate else "1970-01-01T00:00:00Z";
+    in (xmlHeader "utf-8") + "\n" + (h.render [
+      "feed" { xmlns = "http://www.w3.org/2005/Atom"; }
+      [ "title" siteTitle ]
+      [ "id" homeUrl ]
+      (xmlLink { attrs = { href = homeUrl; }; })
+      (xmlLink { attrs = { rel = "self"; type = "application/atom+xml"; href = "${siteUrl}/atom.xml"; }; })
+      [ "updated" feedUpdated ]
+      (map (e:
+        let updated = if e.date != null then isoDateToRfc3339 e.date else feedUpdated;
+        in [ "entry"
+          [ "title" e.title ]
+          [ "id" e.url ]
+          (xmlLink { attrs = { href = e.url; }; })
+          [ "updated" updated ]
+          (lib.optional (e.date != null) [ "published" (isoDateToRfc3339 e.date) ])
+          [ "content" { type = "html"; } e.body ]
+        ]
+      ) m.entries)
+    ]);
 }
