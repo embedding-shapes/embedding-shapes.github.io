@@ -2,7 +2,7 @@
 
 let
   siteTitle = "embedding-shapes";
-  siteUrl = "https://embedding-shapes.github.io";
+  siteUrl = "https://emsh.cat";
   siteDescription = "Welcome to my blog. I write about technology, Nix, and other topics.";
 
   homeUrl = "${siteUrl}/";
@@ -94,12 +94,15 @@ let
         else if path == "/posts/" then "posts"
         else if path == "/about/" then "about"
         else null;
+
+      canonicalHref = if path != null then "${siteUrl}${path}" else null;
     in h.renderPretty [
     "html" { lang = "en"; }
     [ "head"
       [ "meta" { charset = "utf-8"; } ]
       [ "meta" { name = "viewport"; content = "width=device-width, initial-scale=1"; } ]
       [ "title" title ]
+      (lib.optional (canonicalHref != null) [ "link" { rel = "canonical"; href = canonicalHref; } ])
       [ "link" { rel = "stylesheet"; href = "/style.css"; } ]
       [ "link" { rel = "stylesheet"; href = "/highlight.css"; } ]
       [ "link" { rel = "icon"; href = "/favicon.svg"; } ]
@@ -151,6 +154,7 @@ in {
 
   renderPostPage = { post }: renderPage {
     title = post.title;
+    path = "/${post.slug}/";
     content = [
       [ "h1" post.title ]
       (lib.optional (post.date != null) [ "p" { class = "post-date"; } post.date ])
