@@ -144,7 +144,7 @@ in {
       [ "h1" "About" ]
       [ "ul"
         [ "li" "GitHub: " [ "a" { href = "https://github.com/embedding-shapes/"; } "embedding-shapes" ] ]
-        [ "li" "Bluesky: " [ "a" { href = "https://bsky.app/profile/embedding-shapes.bsky.social"; } "embedding-shapes.bsky.social" ] ]
+        [ "li" "Bluesky: " [ "a" { href = "https://bsky.app/profile/emsh.cat"; } "@emsh.cat" ] ]
         [ "li" "Mastodon: " [ "a" { href = "https://mastodon.social/@embedding_shapes"; } "@embedding_shapes@mastodon.social" ] ]
         [ "li" "Email: " [ "a" { href = "mailto:embedding-shapes@proton.me"; } "embedding-shapes@proton.me" ] ]
       ]
