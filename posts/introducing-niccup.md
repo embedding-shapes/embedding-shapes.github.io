@@ -18,7 +18,7 @@ Ever wish it was really simple to create HTML from just Nix expressions, not eve
 
 That's it. Nix data structures in, HTML out. Zero dependencies. Works with flakes or without.
 
-[Source Code](https://github.com/embedding-shapes/niccup) | [Website/Docs](https://embedding-shapes.github.io/niccup/) | [Introduction Blog Post](https://embedding-shapes.github.io/introducing-niccup/)
+[Source Code](https://github.com/embedding-shapes/niccup) | [Website/Docs](https://emsh.cat/niccup/) | [Introduction Blog Post](https://emsh.cat/introducing-niccup/)
 
 ## Why Generate HTML from Nix?
 

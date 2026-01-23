@@ -7,6 +7,7 @@ let
 
   homeUrl = "${siteUrl}/";
   postUrl = slug: "${siteUrl}/${slug}/";
+  niccupUrl = "${siteUrl}/niccup/";
 
   xmlHeader = encoding: ''<?xml version="1.0" encoding="${encoding}"?>'';
 
@@ -73,7 +74,7 @@ let
     ]
   ];
 
-  footer = [ "footer" [ "p" "Built with "  [ "a" { href = "https://embedding-shapes.github.io/niccup/"; } "niccup" ]] ];
+  footer = [ "footer" [ "p" "Built with "  [ "a" { href = niccupUrl; } "niccup" ]] ];
 
   postList = posts: [ "ul" { class = "post-list"; }
     (map (p: [ "li"
@@ -208,4 +209,25 @@ in {
         ]
       ) m.entries)
     ]);
+
+  renderSitemapXml = { posts }:
+    let
+      latestPostWithDate = lib.findFirst (p: p.date != null) null posts;
+      siteLastMod = if latestPostWithDate != null then latestPostWithDate.date else null;
+      urls =
+        [
+          { loc = homeUrl; lastmod = siteLastMod; }
+          { loc = "${siteUrl}/posts/"; lastmod = siteLastMod; }
+          { loc = "${siteUrl}/about/"; lastmod = siteLastMod; }
+        ]
+        ++ (map (p: { loc = postUrl p.slug; lastmod = p.date; }) posts);
+    in (xmlHeader "UTF-8") + "\n" + (h.render [
+      "urlset" { xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"; }
+      (map (u: [ "url"
+        [ "loc" u.loc ]
+        (lib.optional (u.lastmod != null) [ "lastmod" u.lastmod ])
+      ]) urls)
+    ]);
+
+  renderRobotsTxt = {}: "User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n";
 }

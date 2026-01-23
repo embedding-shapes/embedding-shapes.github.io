@@ -9,6 +9,8 @@ let
   aboutHtml = pkgs.writeText "about.html" (ui.renderAboutPage { repoVersions = site.repoVersions; });
   rssXml = pkgs.writeText "rss.xml" (ui.renderRssFeed { posts = site.posts; });
   atomXml = pkgs.writeText "atom.xml" (ui.renderAtomFeed { posts = site.posts; });
+  sitemapXml = pkgs.writeText "sitemap.xml" (ui.renderSitemapXml { posts = site.posts; });
+  robotsTxt = pkgs.writeText "robots.txt" (ui.renderRobotsTxt {});
 
 in {
   default = pkgs.runCommand "blog" {} ''
@@ -20,6 +22,8 @@ in {
     cp ${indexHtml} $out/index.html
     cp ${rssXml} $out/rss.xml
     cp ${atomXml} $out/atom.xml
+    cp ${sitemapXml} $out/sitemap.xml
+    cp ${robotsTxt} $out/robots.txt
     mkdir -p $out/posts
     cp ${postsHtml} $out/posts/index.html
     mkdir -p $out/about
