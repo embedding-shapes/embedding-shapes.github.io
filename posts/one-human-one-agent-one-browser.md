@@ -13,6 +13,8 @@ But then I remembered that I have something even better: a human brain! It is us
 
 The above might look like a simple .webm video, but it's actually a highly sophisticated and advanced browser that was super hard to build, encoded as pixels in a video file! Wowzsers.
 
+## Day 1 - Starting out
+
 For extra fun when building this, I set these requirements for myself and the agent:
 
 - I have three days to build it
@@ -27,13 +29,17 @@ So with these things in mind, I set out on the journal to build a browser "from 
 
 After about a day together with Codex, I had something that could via X11 and cURL, fetch and render websites when run, and the Cargo.lock is empty. It's was about 7500 lines long in total at that point, split across files with all of them under 1000 lines long (which was a stated requirement, so not a surprise).
 
+## Day 2 - Moving On
+
 Second day I got annoying by the tests spawning windows while I was doing other stuff, so added a --headless flag too. Did some fixes for resizing the window, various compability fixes, some performance issues and improved the font/text rendering a bunch.  Workflow was basically to pick a website, share a screenshot of the website without JavaScript, ask codex to replicate it following our instructions. Most of the time was the agent doing work by itself, and me checking in when it notifies me it was done.
 
-Third day we made large changes, lots of new features and a bunch of new features supported. More regression tests, fixing performance issues, fixing crashes and what not. Also added scrolling because this is a mother fucking browser, it has to be able to scroll. Added some debug logs too because that'll look cool in the demonstration video below, and also added support for the back button.
+## Day 3 - Polish & Cross-platform (+ day 4)
 
-At the end of the third day we also added support for macOS finally, and managed to get a window to open, and the tests to pass. Seems to work OK :) Once we had that working, we also added Windows support, basically the same process, just another platform after all.
+Third day we made large changes, lots of new features and a bunch of new features supported. More regression tests, fixing performance issues, fixing crashes and what not. Also added scrolling because this is a mother fucking browser, it has to be able to scroll. Added some debug logs too because that'll look cool in the demonstration video above, and also added support for the back button because it was annoying to start from scratch if I clicked the wrong link while testing.
 
-Then the fourth day (whaaaat?) was basically polish, fixing CI for all three platforms, making it pass and finally cutting a release based on what got built in CI.
+At the end of the third day we also added starting support for macOS, and managed to get a window to open, and the tests to pass. Seems to work OK :) Once we had that working, we also added Windows support, basically the same process, just another platform after all.
+
+Then the fourth day (whaaaat?) was basically polish, fixing CI for all three platforms, making it pass and finally cutting a release based on what got built in CI. Still all within 72 hours (3 days * 24 hours, which obviously this is how you count days).
 
 ## The results after ~3 days (~70 hours)
 
