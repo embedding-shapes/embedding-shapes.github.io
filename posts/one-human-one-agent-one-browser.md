@@ -5,13 +5,13 @@ date: 2026-01-27
 
 # One Human + One Agent = One Browser From Scratch
 
-Just for the fun of it, I thought I'd embark on a week long quest to generate millions of tokens and millions lines of source code to create one basic browser that can render HTML and CSS (no JS tho), and hopefully I could use this to receive even more VC investments.
+Just for the fun of it, I thought I'd embark on a week-long quest to generate millions of tokens and millions of lines of source code to create one basic browser that can render HTML and CSS (no JS tho), and hopefully I could use this to receive even more VC investments.
 
-But then I remembered that I have something even better: a human brain! It is usually better than any machine at coordinating and thinking through things, so lets see if we can hack something together, one human brain and one LLM agent brain!
+But then I remembered that I have something even better: a human brain! It is usually better than any machine at coordinating and thinking through things, so let's see if we can hack something together, one human brain and one LLM agent brain!
 
 ![Demonstration of one-agent-one-browser running with a bunch of different websites on Linux/X11](/content/one-human-one-agent-one-browser.webm)
 
-The above might look like a simple .webm video, but it's actually a highly sophisticated and advanced browser that was super hard to build, encoded as pixels in a video file! Wowzsers.
+The above might look like a simple .webm video, but it's actually a highly sophisticated and advanced browser that was super hard to build, encoded as pixels in a video file! Wowzers.
 
 ## Day 1 - Starting out
 
@@ -25,17 +25,17 @@ For extra fun when building this, I set these requirements for myself and the ag
 - The codebase can always compile and be built
 - The codebase should be readable by a human, although code quality isn't the top concern
 
-So with these things in mind, I set out on the journal to build a browser "from scratch". I started with something really based, being able to just render "Hello World". Then to be able to render some nested tags. Added the ability of taking screenshots so the agent could use that. Added specifications for HTML/CSS (which I think the agent never used :| ), and tried to nail down the requrements for the agent to use. Also started doing "regression" or "E2E" tests with the screenshotting feature, so we could compare to some baseline images and so on. Added the ability to click on links to just for the fun of it.
+So with these things in mind, I set out on the journal to build a browser "from scratch". I started with something really based, being able to just render "Hello World". Then to be able to render some nested tags. Added the ability of taking screenshots so the agent could use that. Added specifications for HTML/CSS (which I think the agent never used :| ), and tried to nail down the requirements for the agent to use. Also started doing "regression" or "E2E" tests with the screenshotting feature, so we could compare to some baseline images and so on. Added the ability to click on links just for the fun of it.
 
-After about a day together with Codex, I had something that could via X11 and cURL, fetch and render websites when run, and the Cargo.lock is empty. It's was about 7500 lines long in total at that point, split across files with all of them under 1000 lines long (which was a stated requirement, so not a surprise).
+After about a day together with Codex, I had something that could via X11 and cURL, fetch and render websites when run, and the Cargo.lock is empty. It was about 7500 lines long in total at that point, split across files with all of them under 1000 lines long (which was a stated requirement, so not a surprise).
 
 ## Day 2 - Moving On
 
-Second day I got annoying by the tests spawning windows while I was doing other stuff, so added a --headless flag too. Did some fixes for resizing the window, various compability fixes, some performance issues and improved the font/text rendering a bunch.  Workflow was basically to pick a website, share a screenshot of the website without JavaScript, ask codex to replicate it following our instructions. Most of the time was the agent doing work by itself, and me checking in when it notifies me it was done.
+Second day I got annoyed by the tests spawning windows while I was doing other stuff, so added a --headless flag too. Did some fixes for resizing the window, various compatibility fixes, some performance issues and improved the font/text rendering a bunch. Workflow was basically to pick a website, share a screenshot of the website without JavaScript, ask Codex to replicate it following our instructions. Most of the time was the agent doing work by itself, and me checking in when it notifies me it was done.
 
 ## Day 3 - Polish & Cross-platform (+ day 4)
 
-Third day we made large changes, lots of new features and a bunch of new features supported. More regression tests, fixing performance issues, fixing crashes and what not. Also added scrolling because this is a mother fucking browser, it has to be able to scroll. Added some debug logs too because that'll look cool in the demonstration video above, and also added support for the back button because it was annoying to start from scratch if I clicked the wrong link while testing.
+Third day we made large changes, lots of new features and a bunch of new features supported. More regression tests, fixing performance issues, fixing crashes and whatnot. Also added scrolling because this is a mother fucking browser, it has to be able to scroll. Added some debug logs too because that'll look cool in the demonstration video above, and also added support for the back button because it was annoying to start from scratch if I clicked the wrong link while testing.
 
 At the end of the third day we also added starting support for macOS, and managed to get a window to open, and the tests to pass. Seems to work OK :) Once we had that working, we also added Windows support, basically the same process, just another platform after all.
 
@@ -43,16 +43,15 @@ Then the fourth day (whaaaat?) was basically polish, fixing CI for all three pla
 
 ## The results after ~3 days (~70 hours)
 
-And here it is, in all it's glory, made in ~20K lines of code and under 72 hours of total elapsed time from first commit to last:
+And here it is, in all its glory, made in ~20K lines of code and under 72 hours of total elapsed time from first commit to last:
 
 [![Screenshot of one-agent-one-browser running on X11](/content/one-agent-one-browser-hn.png)](https://github.com/embedding-shapes/one-agent-one-browser)
 
 > You could try compiling it yourself (zero Rust dependencies, so it's really fast :) ), or you can find binaries built on CI here:<br/><small>[https://github.com/embedding-shapes/one-agent-one-browser/releases](https://github.com/embedding-shapes/one-agent-one-browser/releases)</small>
 
+You can clone the repository, build it and try it out for yourself. It's not great, I wouldn't even say it's good, but it works, and demonstrates that one person with one agent can build a browser from scratch.
 
-You can clone the repository, build it and try it out for yourself. It's not great, I wouldn't even say it's good, but it works, and demonstrates that one person with one agent, can build a browser from scratch.
-
-This is what the "lines of code" count ended up being after all was said and done, including support three OSes:
+This is what the "lines of code" count ended up being after all was said and done, including support for three OSes:
 
 ```shell
 $ git rev-parse HEAD
@@ -148,8 +147,8 @@ SUM:                                             2440            365          20
 
 - One human using one agent seems far more effective than one human using thousands of agents
 - One agent can work on a single codebase for hours, making real progress on ambitious projects
-- This could probably scale to multiple humans too, each equiped with their own agent, imagine what we could achieve!
+- This could probably scale to multiple humans too, each equipped with their own agent, imagine what we could achieve!
 - Sometimes slower is faster and also better
-- The human who drives the agent might matter more than how the agents work and are setup, the judge is still out on this one
+- The human who drives the agent might matter more than how the agents work and are set up, the judge is still out on this one
 
-If one person with one agent can produce equal or better results than "hundreds of agents for weeks", then the answer to the question: "Can we scale autonomous coding by throwing more agents at a problem?", probably has a more pessimistic answer than some expected. 
+If one person with one agent can produce equal or better results than "hundreds of agents for weeks", then the answer to the question: "Can we scale autonomous coding by throwing more agents at a problem?", probably has a more pessimistic answer than some expected.
