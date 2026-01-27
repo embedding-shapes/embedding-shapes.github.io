@@ -74,7 +74,7 @@ let
     ]
   ];
 
-  footer = [ "footer" [ "p" "Built with "  [ "a" { href = niccupUrl; } "niccup" ]] ];
+  footer = [ "footer" [ "p" "Built with "  [ "a" { href = niccupUrl; } "niccup" ] " · " [ "a" { href = "/atom.xml"; } "Atom" ] " / " [ "a" { href = "/rss.xml"; } "RSS" ] ] ];
 
   postList = posts: [ "ul" { class = "post-list"; }
     (map (p: [ "li"
