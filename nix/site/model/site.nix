@@ -124,16 +124,21 @@ let
     }
   ]) i18n.locales;
 
+  localeFeedGroupsFor = locale:
+    lib.take config.feedMaxItems (
+      lib.filter (group: builtins.hasAttr locale group.translations) posts.groups
+    );
+
   localeFeedEntriesFor = locale:
     map (group:
-      let variant = displayVariantFor locale group;
+      let variant = group.translations.${locale};
       in {
         body = variant.body;
         date = group.date;
         title = variant.title;
         url = routes.absoluteUrl (routes.postPath variant.locale variant.slug);
       }
-    ) feedGroups;
+    ) (localeFeedGroupsFor locale);
 
   compatibilityFeedEntries = map (group:
     let

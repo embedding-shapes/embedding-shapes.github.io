@@ -15,6 +15,11 @@ pkgs.runCommand "site-output-check" {
   test -f ${site}/atom.xml
   test -f ${site}/rss.xml
   test -f ${site}/en/atom.xml
+  test -f ${site}/es/atom.xml
+  test -f ${site}/es/rss.xml
+  test -f ${site}/ca/atom.xml
+  test -f ${site}/ca/rss.xml
+  test -f ${site}/sv/atom.xml
   test -f ${site}/sv/rss.xml
 
   grep -F 'https://emsh.cat/en/good-taste/' ${site}/en/good-taste/index.html >/dev/null
@@ -30,6 +35,13 @@ pkgs.runCommand "site-output-check" {
   grep -F '<link>https://emsh.cat/</link>' ${site}/rss.xml >/dev/null
   grep -F '<guid isPermaLink="true">https://emsh.cat/good-taste/</guid>' ${site}/rss.xml >/dev/null
   grep -F 'https://emsh.cat/en/good-taste/' ${site}/en/atom.xml >/dev/null
+  grep -F 'https://emsh.cat/sv/god-smak/' ${site}/sv/atom.xml >/dev/null
+  if grep -F '<entry>' ${site}/es/atom.xml >/dev/null; then exit 1; fi
+  if grep -F '<item>' ${site}/es/rss.xml >/dev/null; then exit 1; fi
+  if grep -F '<entry>' ${site}/ca/atom.xml >/dev/null; then exit 1; fi
+  if grep -F '<item>' ${site}/ca/rss.xml >/dev/null; then exit 1; fi
+  if grep -F 'https://emsh.cat/en/good-taste/' ${site}/sv/atom.xml >/dev/null; then exit 1; fi
+  if grep -F 'https://emsh.cat/en/one-human-one-agent-one-browser/' ${site}/sv/atom.xml >/dev/null; then exit 1; fi
 
   echo ok > "$out"
 ''
