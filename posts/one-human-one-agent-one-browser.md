@@ -1,6 +1,7 @@
 ---
 title: One Human + One Agent = One Browser From Scratch
 date: 2026-01-27
+slug: one-human-one-agent-one-browser
 ---
 
 # One Human + One Agent = One Browser From Scratch

@@ -1,6 +1,7 @@
 ---
 title: Niccup: Hiccup-like HTML Generation in ~120 Lines of Pure Nix
 date: 2025-12-03
+slug: introducing-niccup
 ---
 
 Ever wish it was really simple to create HTML from just Nix expressions, not even having to deal with function calls or other complexities? With niccup, now there is!

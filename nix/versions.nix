@@ -85,14 +85,15 @@ let
     else mdToHtml (versionsMd args);
 
 in {
-  postVersionsHtml = filename: versionsHtml {
+  postVersionsHtml = { filename, summary ? "Versions" }: versionsHtml {
     name = "post-versions-${lib.removeSuffix ".md" filename}.md";
+    inherit summary;
     file = "posts/${filename}";
     follow = true;
   };
 
-  repoVersions = versionsHtml {
+  repoVersionsHtml = summary: versionsHtml {
     name = "repo-versions.md";
-    summary = "Repository Versions";
+    inherit summary;
   };
 }

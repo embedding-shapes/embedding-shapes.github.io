@@ -1,6 +1,7 @@
 ---
 title: Good Taste
 date: 2026-01-25
+slug: good-taste
 ---
 
 There is a lot of doom going around, how all developers, creatives and others are losing our jobs because AI is coming to take them. Some of that doom is real; there's work that's basically throughput and spec compliance, and AI can replace big chunks of it. But what I’m talking about here is the other kind of work, where you have authorship and stake in what you're producing, as a human creator.

@@ -26,6 +26,7 @@ let
   };
 in
 {
+  meta.description = "Serve the blog locally with live rebuilds.";
   type = "app";
   program = "${serve}/bin/serve";
 }
