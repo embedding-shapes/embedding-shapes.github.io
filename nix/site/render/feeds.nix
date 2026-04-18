@@ -36,17 +36,17 @@ let
 in {
   renderAtomFeed = feed:
     let
-      entries = siteModel.feedEntriesFor feed.locale;
+      entries = feed.entries;
       feedUpdated =
         if entries == [] || builtins.head entries == null || (builtins.head entries).date == null
         then "1970-01-01T00:00:00Z"
         else isoDateToRfc3339 (builtins.head entries).date;
     in (xmlHeader "utf-8") + "\n" + (h.render [
       "feed" { xmlns = "http://www.w3.org/2005/Atom"; }
-      [ "title" config.siteTitle ]
-      [ "id" "${config.siteUrl}${feed.path}" ]
-      (xmlLink { attrs = { href = "${config.siteUrl}${feed.path}"; rel = "self"; type = "application/atom+xml"; }; })
-      (xmlLink { attrs = { href = "${config.siteUrl}/${feed.locale}/"; }; })
+      [ "title" feed.title ]
+      [ "id" feed.feedId ]
+      (xmlLink { attrs = { href = feed.selfUrl; rel = "self"; type = "application/atom+xml"; }; })
+      (xmlLink { attrs = { href = feed.homeUrl; }; })
       [ "updated" feedUpdated ]
       (map (entry:
         let updated = if entry.date != null then isoDateToRfc3339 entry.date else feedUpdated;
@@ -65,15 +65,15 @@ in {
 
   renderRssFeed = feed:
     let
-      entries = siteModel.feedEntriesFor feed.locale;
+      entries = feed.entries;
       latestEntry = lib.findFirst (entry: entry.date != null) null entries;
       lastBuildDate = if latestEntry != null then isoDateToRfc822 latestEntry.date else null;
     in (xmlHeader "UTF-8") + "\n" + (h.render [
       "rss" { version = "2.0"; }
       [ "channel"
-        [ "title" config.siteTitle ]
-        (xmlLink { content = "${config.siteUrl}/${feed.locale}/"; })
-        [ "description" (siteModel.stringsFor feed.locale).intro ]
+        [ "title" feed.title ]
+        (xmlLink { content = feed.homeUrl; })
+        [ "description" feed.description ]
         [ "language" feed.locale ]
         (lib.optional (lastBuildDate != null) [ "lastBuildDate" lastBuildDate ])
         (map (entry: [ "item"

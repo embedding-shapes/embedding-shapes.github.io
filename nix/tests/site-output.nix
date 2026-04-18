@@ -13,6 +13,7 @@ pkgs.runCommand "site-output-check" {
   test -f ${site}/about/index.html
   test -f ${site}/posts/index.html
   test -f ${site}/atom.xml
+  test -f ${site}/rss.xml
   test -f ${site}/en/atom.xml
   test -f ${site}/sv/rss.xml
 
@@ -24,6 +25,11 @@ pkgs.runCommand "site-output-check" {
   grep -F 'url=/en/posts/' ${site}/posts/index.html >/dev/null
   grep -F 'url=/en/good-taste/' ${site}/good-taste/index.html >/dev/null
   grep -F 'window.location.replace("/en/good-taste/")' ${site}/good-taste/index.html >/dev/null
+  grep -F '<id>https://emsh.cat/</id>' ${site}/atom.xml >/dev/null
+  grep -F 'https://emsh.cat/good-taste/' ${site}/atom.xml >/dev/null
+  grep -F '<link>https://emsh.cat/</link>' ${site}/rss.xml >/dev/null
+  grep -F '<guid isPermaLink="true">https://emsh.cat/good-taste/</guid>' ${site}/rss.xml >/dev/null
+  grep -F 'https://emsh.cat/en/good-taste/' ${site}/en/atom.xml >/dev/null
 
   echo ok > "$out"
 ''

@@ -15,10 +15,10 @@
     "posts"
   ];
 
-  legacyRootPosts = [
-    "cursor-implied-success-without-evidence"
-    "good-taste"
-    "introducing-niccup"
-    "one-human-one-agent-one-browser"
-  ];
+  legacyRootPosts = {
+    "cursor-implied-success-without-evidence" = "cursor-implied-success-without-evidence";
+    "good-taste" = "good-taste";
+    "introducing-niccup" = "introducing-niccup";
+    "one-human-one-agent-one-browser" = "one-human-one-agent-one-browser";
+  };
 }

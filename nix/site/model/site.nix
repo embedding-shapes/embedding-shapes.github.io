@@ -3,6 +3,7 @@
 let
   latestGroup = lib.findFirst (group: group.date != null) null posts.groups;
   latestDate = if latestGroup != null then latestGroup.date else null;
+  feedGroups = lib.take config.feedMaxItems posts.groups;
 
   stringsFor = locale: i18n.stringsFor locale;
 
@@ -10,6 +11,11 @@ let
     if builtins.hasAttr locale group.translations
     then group.translations.${locale}
     else group.translations.${i18n.defaultLocale};
+
+  legacyRootPathFor = group:
+    if builtins.hasAttr group.id config.legacyRootPosts
+    then "/${config.legacyRootPosts.${group.id}}/"
+    else null;
 
   pageLanguageLinks = pageKey: currentLocale:
     map (locale: {
@@ -65,30 +71,90 @@ let
   ) posts.groups;
 
   compatibilityFeeds = [
-    { format = "atom"; locale = i18n.defaultLocale; output = "atom.xml"; path = "/atom.xml"; }
-    { format = "rss"; locale = i18n.defaultLocale; output = "rss.xml"; path = "/rss.xml"; }
+    {
+      description = (stringsFor i18n.defaultLocale).intro;
+      entries = compatibilityFeedEntries;
+      feedId = routes.absoluteUrl "/";
+      format = "atom";
+      homeUrl = routes.absoluteUrl "/";
+      locale = i18n.defaultLocale;
+      output = "atom.xml";
+      path = "/atom.xml";
+      selfUrl = routes.absoluteUrl "/atom.xml";
+      title = config.siteTitle;
+    }
+    {
+      description = (stringsFor i18n.defaultLocale).intro;
+      entries = compatibilityFeedEntries;
+      feedId = routes.absoluteUrl "/";
+      format = "rss";
+      homeUrl = routes.absoluteUrl "/";
+      locale = i18n.defaultLocale;
+      output = "rss.xml";
+      path = "/rss.xml";
+      selfUrl = routes.absoluteUrl "/rss.xml";
+      title = config.siteTitle;
+    }
   ];
 
   localeFeeds = lib.concatMap (locale: [
     {
+      description = (stringsFor locale).intro;
+      entries = localeFeedEntriesFor locale;
+      feedId = routes.absoluteUrl (routes.feedPath locale "atom");
       format = "atom";
+      homeUrl = routes.absoluteUrl (routes.homePath locale);
       inherit locale;
       output = routes.feedOutputPath locale "atom";
       path = routes.feedPath locale "atom";
+      selfUrl = routes.absoluteUrl (routes.feedPath locale "atom");
+      title = config.siteTitle;
     }
     {
+      description = (stringsFor locale).intro;
+      entries = localeFeedEntriesFor locale;
+      feedId = routes.absoluteUrl (routes.feedPath locale "rss");
       format = "rss";
+      homeUrl = routes.absoluteUrl (routes.homePath locale);
       inherit locale;
       output = routes.feedOutputPath locale "rss";
       path = routes.feedPath locale "rss";
+      selfUrl = routes.absoluteUrl (routes.feedPath locale "rss");
+      title = config.siteTitle;
     }
   ]) i18n.locales;
 
-  legacyPostRedirects = map (groupKey:
+  localeFeedEntriesFor = locale:
+    map (group:
+      let variant = displayVariantFor locale group;
+      in {
+        body = variant.body;
+        date = group.date;
+        title = variant.title;
+        url = routes.absoluteUrl (routes.postPath variant.locale variant.slug);
+      }
+    ) feedGroups;
+
+  compatibilityFeedEntries = map (group:
+    let
+      variant = group.translations.${i18n.defaultLocale};
+      legacyPath = legacyRootPathFor group;
+    in {
+      body = variant.body;
+      date = group.date;
+      title = variant.title;
+      url = routes.absoluteUrl (
+        if legacyPath != null then legacyPath
+        else routes.postPath variant.locale variant.slug
+      );
+    }
+  ) feedGroups;
+
+  legacyPostRedirects = lib.mapAttrsToList (groupKey: legacySlug:
     let group = posts.byId.${groupKey};
     in {
-      output = routes.htmlOutputPath "/${groupKey}/";
-      path = "/${groupKey}/";
+      output = routes.htmlOutputPath "/${legacySlug}/";
+      path = "/${legacySlug}/";
       target = routes.postPath i18n.defaultLocale group.translations.${i18n.defaultLocale}.slug;
     }
   ) config.legacyRootPosts;
@@ -103,17 +169,6 @@ in {
   aboutPages = aboutPages;
   compatibilityFeeds = compatibilityFeeds;
   displayVariantFor = displayVariantFor;
-  feedEntriesFor = locale:
-    let groups = lib.take config.feedMaxItems posts.groups;
-    in map (group:
-      let variant = displayVariantFor locale group;
-      in {
-        body = variant.body;
-        date = group.date;
-        title = variant.title;
-        url = routes.absoluteUrl (routes.postPath variant.locale variant.slug);
-      }
-    ) groups;
   homePages = homePages;
   htmlPages = homePages ++ postsPages ++ aboutPages ++ postPages;
   languageAlternatesForPage = pageKey:
