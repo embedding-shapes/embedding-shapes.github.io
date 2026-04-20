@@ -1,8 +1,12 @@
 { pkgs, lib, gitDir, mdToHtml }:
 
 let
-  versionsMd = { name, summary ? "Versions", file ? null, follow ? false }:
-    pkgs.runCommandLocal name {
+  versionsMd = { name, summary ? "Versions", file ? null, files ? [], follow ? false }:
+    let
+      trackedFiles =
+        if files != [] then files
+        else lib.optional (file != null) file;
+    in pkgs.runCommandLocal name {
       nativeBuildInputs = [ pkgs.git pkgs.gnused pkgs.gnugrep ];
     } ''
       set -euo pipefail
@@ -10,11 +14,16 @@ let
       export GIT_OPTIONAL_LOCKS=0
 
       summary=${lib.escapeShellArg summary}
-      file=${lib.escapeShellArg (if file == null then "" else file)}
       log="$TMPDIR/log.tsv"
+      tracked_files=()
+      ${lib.concatMapStringsSep "\n" (trackedFile:
+        "tracked_files+=(${lib.escapeShellArg trackedFile})"
+      ) trackedFiles}
 
-      if [ -n "$file" ]; then
-        ${pkgs.git}/bin/git log ${lib.optionalString follow "--follow"} --date=short --format='%H%x09%ad%x09%s' -- "$file" > "$log" 2>/dev/null || true
+      if [ "''${#tracked_files[@]}" -gt 0 ]; then
+        ${pkgs.git}/bin/git log \
+          ${lib.optionalString (follow && (builtins.length trackedFiles == 1)) "--follow"} \
+          --date=short --format='%H%x09%ad%x09%s' -- "''${tracked_files[@]}" > "$log" 2>/dev/null || true
       else
         ${pkgs.git}/bin/git log --date=short --format='%H%x09%ad%x09%s' > "$log" 2>/dev/null || true
       fi
@@ -42,9 +51,14 @@ let
           diff_body="$TMPDIR/diff.body"
           diff_word="$TMPDIR/diff.word"
 
-          if [ -z "$file" ]; then
+          if [ "''${#tracked_files[@]}" -eq 0 ]; then
             ${pkgs.git}/bin/git show --no-color --format= --unified=0 "$hash" 2>/dev/null > "$diff_body" || true
+          elif [ "''${#tracked_files[@]}" -gt 1 ]; then
+            # Keep post-level history easy to follow by showing the combined patch
+            # for all translation files touched by the commit.
+            ${pkgs.git}/bin/git show --no-color --format= --unified=0 "$hash" -- "''${tracked_files[@]}" 2>/dev/null > "$diff_body" || true
           else
+            file="''${tracked_files[0]}"
             status="$(${pkgs.git}/bin/git show --no-color --format= --name-status -1 "$hash" -- "$file" 2>/dev/null | ${pkgs.gnused}/bin/sed -n '1s/\t.*$//p')"
 
             case "$status" in
@@ -85,12 +99,19 @@ let
     else mdToHtml (versionsMd args);
 
 in {
-  postVersionsHtml = { filename, summary ? "Versions" }: versionsHtml {
-    name = "post-versions-${lib.removeSuffix ".md" filename}.md";
-    inherit summary;
-    file = "posts/${filename}";
-    follow = true;
-  };
+  postVersionsHtml = { filename ? null, filenames ? [], summary ? "Versions" }:
+    let
+      normalizedFilenames =
+        if filenames != [] then filenames
+        else lib.optional (filename != null) filename;
+    in versionsHtml {
+      name =
+        if normalizedFilenames == [] then "post-versions.md"
+        else "post-versions-${lib.removeSuffix ".md" (builtins.head normalizedFilenames)}.md";
+      inherit summary;
+      files = map (postFilename: "posts/${postFilename}") normalizedFilenames;
+      follow = builtins.length normalizedFilenames == 1;
+    };
 
   repoVersionsHtml = summary: versionsHtml {
     name = "repo-versions.md";

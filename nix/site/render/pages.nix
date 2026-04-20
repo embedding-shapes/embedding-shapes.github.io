@@ -71,7 +71,7 @@ in {
     let
       strings = siteModel.stringsFor page.locale;
       versionsHtml = versions.postVersionsHtml {
-        filename = page.post.filename;
+        filenames = map (locale: page.group.translations.${locale}.filename) page.group.availableLocales;
         summary = strings.versions;
       };
     in common.renderPage {
