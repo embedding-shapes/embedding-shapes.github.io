@@ -3,6 +3,11 @@
 pkgs.runCommand "site-output-check" {
   nativeBuildInputs = [ pkgs.gnugrep ];
 } ''
+  check() {
+    grep -F "$2" ${site}/"$3" >/dev/null && actual=present || actual=absent
+    [ "$1" = "$actual" ] || { echo "$3: expected=$1 actual=$actual value=$2" >&2; return 1; }
+  }
+
   test -f ${site}/en/index.html
   test -f ${site}/es/index.html
   test -f ${site}/ca/index.html
@@ -22,26 +27,26 @@ pkgs.runCommand "site-output-check" {
   test -f ${site}/sv/atom.xml
   test -f ${site}/sv/rss.xml
 
-  grep -F 'https://emsh.cat/en/good-taste/' ${site}/en/good-taste/index.html >/dev/null
-  grep -F 'hreflang="x-default"' ${site}/en/good-taste/index.html >/dev/null
-  grep -F 'class="post-languages"' ${site}/en/posts/index.html >/dev/null
-  grep -F 'url=/en/' ${site}/index.html >/dev/null
-  grep -F 'url=/en/about/' ${site}/about/index.html >/dev/null
-  grep -F 'url=/en/posts/' ${site}/posts/index.html >/dev/null
-  grep -F 'url=/en/good-taste/' ${site}/good-taste/index.html >/dev/null
-  grep -F 'window.location.replace("/en/good-taste/")' ${site}/good-taste/index.html >/dev/null
-  grep -F '<id>https://emsh.cat/</id>' ${site}/atom.xml >/dev/null
-  grep -F 'https://emsh.cat/good-taste/' ${site}/atom.xml >/dev/null
-  grep -F '<link>https://emsh.cat/</link>' ${site}/rss.xml >/dev/null
-  grep -F '<guid isPermaLink="true">https://emsh.cat/good-taste/</guid>' ${site}/rss.xml >/dev/null
-  grep -F 'https://emsh.cat/en/good-taste/' ${site}/en/atom.xml >/dev/null
-  grep -F 'https://emsh.cat/sv/god-smak/' ${site}/sv/atom.xml >/dev/null
-  if grep -F '<entry>' ${site}/es/atom.xml >/dev/null; then exit 1; fi
-  if grep -F '<item>' ${site}/es/rss.xml >/dev/null; then exit 1; fi
-  if grep -F '<entry>' ${site}/ca/atom.xml >/dev/null; then exit 1; fi
-  if grep -F '<item>' ${site}/ca/rss.xml >/dev/null; then exit 1; fi
-  if grep -F 'https://emsh.cat/en/good-taste/' ${site}/sv/atom.xml >/dev/null; then exit 1; fi
-  if grep -F 'https://emsh.cat/en/one-human-one-agent-one-browser/' ${site}/sv/atom.xml >/dev/null; then exit 1; fi
+  check present 'https://emsh.cat/en/good-taste/' en/good-taste/index.html
+  check present 'hreflang="x-default"' en/good-taste/index.html
+  check present 'class="post-languages"' en/posts/index.html
+  check present 'url=/en/' index.html
+  check present 'url=/en/about/' about/index.html
+  check present 'url=/en/posts/' posts/index.html
+  check present 'url=/en/good-taste/' good-taste/index.html
+  check present 'window.location.replace("/en/good-taste/")' good-taste/index.html
+  check present '<id>https://emsh.cat/</id>' atom.xml
+  check present 'https://emsh.cat/good-taste/' atom.xml
+  check present '<link>https://emsh.cat/</link>' rss.xml
+  check present '<guid isPermaLink="true">https://emsh.cat/good-taste/</guid>' rss.xml
+  check present 'https://emsh.cat/en/good-taste/' en/atom.xml
+  check present 'https://emsh.cat/sv/god-smak/' sv/atom.xml
+  check absent '<entry>' es/atom.xml
+  check absent '<item>' es/rss.xml
+  check absent '<entry>' ca/atom.xml
+  check absent '<item>' ca/rss.xml
+  check absent 'https://emsh.cat/en/good-taste/' sv/atom.xml
+  check absent 'https://emsh.cat/en/one-human-one-agent-one-browser/' sv/atom.xml
 
   echo ok > "$out"
 ''
