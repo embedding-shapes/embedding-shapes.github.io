@@ -3,9 +3,10 @@
 pkgs.runCommand "site-output-check" {
   nativeBuildInputs = [ pkgs.gnugrep ];
 } ''
+  failed=0
   check() {
     grep -F "$2" ${site}/"$3" >/dev/null && actual=present || actual=absent
-    [ "$1" = "$actual" ] || { echo "$3: expected=$1 actual=$actual value=$2" >&2; return 1; }
+    [ "$1" = "$actual" ] || { echo "$3: expected=$1 actual=$actual value=$2" >&2; failed=1; }
   }
 
   test -f ${site}/en/index.html
@@ -48,5 +49,6 @@ pkgs.runCommand "site-output-check" {
   check absent 'https://emsh.cat/en/good-taste/' sv/atom.xml
   check absent 'https://emsh.cat/en/one-human-one-agent-one-browser/' sv/atom.xml
 
+  [ "$failed" = 0 ]
   echo ok > "$out"
 ''
