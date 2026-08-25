@@ -48,6 +48,7 @@ main h1 {
 main h2 { margin: 2rem 0 1rem; color: #d8d8d8; font-size: 1.25rem; font-weight: 600; }
 main h3 { margin: 1.75rem 0 0.75rem; color: #d0d0d0; font-size: 1.1rem; font-weight: 600; }
 main p { margin-bottom: 1.25rem; }
+main hr { margin: 1.25rem 0; }
 main img, main video { max-width: 100%; height: auto; }
 main ul, main ol { margin: 1.25rem 0 1.25rem 1.25rem; }
 main li { margin-bottom: 0.375rem; }
