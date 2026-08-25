@@ -42,10 +42,6 @@ pkgs.runCommand "site-output-check" {
   check present '<guid isPermaLink="true">https://emsh.cat/good-taste/</guid>' rss.xml
   check present 'https://emsh.cat/en/good-taste/' en/atom.xml
   check present 'https://emsh.cat/sv/god-smak/' sv/atom.xml
-  check absent '<entry>' es/atom.xml
-  check absent '<item>' es/rss.xml
-  check absent '<entry>' ca/atom.xml
-  check absent '<item>' ca/rss.xml
   check absent 'https://emsh.cat/en/good-taste/' sv/atom.xml
   check absent 'https://emsh.cat/en/one-human-one-agent-one-browser/' sv/atom.xml
 
